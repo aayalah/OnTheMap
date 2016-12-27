@@ -2,15 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "map.pdf",
+      "filename" : "udacity.pdf",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
+      "filename" : "udacity-1.pdf",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
+      "filename" : "udacity-2.pdf",
       "scale" : "3x"
     }
   ],

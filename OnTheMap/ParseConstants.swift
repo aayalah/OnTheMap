@@ -25,7 +25,7 @@ extension ParseClient {
         static let Api_Host = "parse.udacity.com"
         static let Api_Path = "/parse/classes"
         static let Auth_URL = "https://www.udacity.com/api/session"
-        
+        static let UserData = "https://www.udacity.com/api/users/{id}"
         
     }
 
@@ -33,13 +33,12 @@ extension ParseClient {
     struct ClassesMethods {
         static let Locations = "/StudentLocation"
         static let LocationsUserUpdate = "/StudentLocation/{id}"
-        static let UserData = "/users/{id}"
     }
     
     //URL Keys
     
     struct URLKeys {
-        let objectId = "id"
+        static let objectId = "id"
     }
     
     //Parameters
@@ -53,6 +52,10 @@ extension ParseClient {
         static let skip = "skip"
         static let where_param = "where"
         static let uniqueKey = "uniqueKey"
+        static let recent = "order"
+        static let updatedOrder = "updatedAt"
+        static let limitAmount = 100
+        static let skipAmount = 0
     }
     
     struct ClassesPostParameters {
@@ -112,6 +115,10 @@ extension ParseClient {
         static let latitude = "latitude"
         static let longitude = "longitude"
 
+        //MARK: UserInfo
+        static let infoBodyKey = "user"
+        static let first_name = "first_name"
+        static let last_name = "last_name"
         
     }
     

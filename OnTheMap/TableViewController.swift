@@ -7,22 +7,99 @@
 //
 
 import UIKit
+import FBSDKLoginKit
 
-class TableViewController: UIViewController,UITableViewDelegate, UITableViewDataSource {
+class TableViewController: UIViewController,UITableViewDelegate, UITableViewDataSource, ModalDismissal{
     @IBOutlet weak var tableView: UITableView!
     
     let userModel = UserModel.sharedInstance()
-
+    
+    override func loadView() {
+        super.loadView()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
-
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if(segue.identifier == "edit"){
+            let controller = segue.destination as! EditViewController
+            controller.delegate = self
+        }
+    }
+    
+    @IBAction func refresh(_ sender: UIBarButtonItem) {
+        getUsers()
+        tableView.reloadData()
+    }
+    
+    @IBAction func logout(_ sender: Any) {
+        ParseClient.sharedInstance().deleteSession { success, error in
+            performUIUpdatesOnMain {
+                if success {
+                    FBSDKLoginManager().logOut()
+                    self.performSegue(withIdentifier: "logout", sender: nil)
+                }
+            }
+        }
+    }
+    
+    
+    @IBAction func addLocation(_ sender: UIBarButtonItem) {
+        userModel.getUserInfo { success, error in
+            if success {
+                self.getLocation()
+            } else {
+                performUIUpdatesOnMain {
+                    self.present(ControllerConstants.displayError(error: "Could not get user info")!, animated: true)
+                }
+            }
+        }
+        
+    }
+    
+    
+    private func getLocation() {
+        userModel.getUserLocation { success, error in
+            
+            performUIUpdatesOnMain {
+                
+                if success {
+                    
+                    let alertController = UIAlertController(title: "Warning", message: "A location already exists. Do you want to overwrite it?", preferredStyle: UIAlertControllerStyle.alert)
+                    alertController.addAction(UIAlertAction(title: "Ok",style: UIAlertActionStyle.default) { action in
+                        self.performSegue(withIdentifier: "edit", sender: nil)
+                    })
+                    alertController.addAction(UIAlertAction(title: "Cancel",style: UIAlertActionStyle.cancel, handler: nil))
+                    self.present(alertController, animated: true)
+                } else {
+                    self.performSegue(withIdentifier: "edit", sender: nil)
+                }
+                
+            }
+            
+            
+        }
+        
+    }
+    
+    func didDismissView() {
+        getUsers()
+    }
+    
+    private func getUsers() {
+        
+        userModel.requestListOfUsers(){ success in
+            performUIUpdatesOnMain{
+                if success {
+                   self.tableView.reloadData()
+                }
+            }
+            
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -45,50 +122,14 @@ class TableViewController: UIViewController,UITableViewDelegate, UITableViewData
         return cell
     }
     
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let myURL = URL(string: userModel.getUsers(index: indexPath.row).getURL()) {
+         UIApplication.shared.open(myURL, options: [:], completionHandler: nil)
     }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
+        
+    
+}
+    
 
 }
